@@ -30,3 +30,7 @@ Data yang sudah diinput saat Anonymous tetap berada di Firestore pada path `user
 - Tombol **Kirim gambar WhatsApp** membuka menu berbagi Android jika browser mendukung file sharing; pilih WhatsApp dan penerima secara manual. Jika perangkat/browser tidak mendukung, PNG diunduh untuk dilampirkan manual ke WhatsApp. Tombol **Simpan PNG** menyimpan gambar ke perangkat.
 - Gambar struk TIDAK diunggah atau disimpan sebagai berkas di Firebase Storage / Firestore. Hanya data transaksi (termasuk field catatan internal yang sudah ada) disimpan di Firestore. Nota dikonstruksi ulang setiap dibuka. Berkas hasil berbagi tunduk pada penyimpanan perangkat/WhatsApp.
 - File `receipt.js` wajib diunggah bersamaan dengan `app.js`, `index.html`, `style.css` dan `assets/logo.png`. Tidak perlu mengubah Firestore Rules atau konfigurasi Firebase untuk fitur nota ini.
+
+
+### Cetak ulang nota transaksi customer
+Buka Lainnya > Customer > Detail / bayar > Riwayat pembelian & nota > Lihat / cetak nota. Bisa juga dari Beranda > Riwayat terbaru > Detail atau Lainnya > Riwayat transaksi > Detail / nota. Tekan Cetak struk untuk membuka dialog cetak browser, Simpan PNG untuk mengunduh gambar, atau Kirim gambar WhatsApp untuk berbagi. Gambar hanya dibuat sementara di browser, tidak diunggah ke Firebase. Nota lama ditampilkan sesuai data pembayaran yang tercatat pada transaksi asal; cicilan sesudahnya tersimpan sebagai transaksi terpisah.

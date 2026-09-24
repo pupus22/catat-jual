@@ -8,3 +8,6 @@
 /* Preview struk portrait seperti desain yang disetujui, gambar lokal tanpa Firebase Storage. */
 .receipt-preview{display:block;width:min(100%,490px);height:auto;margin:0 auto;border:1px solid #e1e5eb;border-radius:4px;box-shadow:0 8px 24px #10274118;background:#fff}.receipt-wait{text-align:center;padding:35px;color:#64748b}.modal-card:has(.receipt-preview){width:min(100%,580px)}
 @media print{.receipt-preview{max-width:100%;width:100%;box-shadow:none;border:0}}
+
+/* Cetak hanya gambar nota yang sedang dibuka, bukan dashboard di belakangnya. */
+@media print{body:has(#receiptPreview) #app,body:has(#receiptPreview) #loading,body:has(#receiptPreview) #login{display:none!important}body:has(#receiptPreview) #modal{display:block!important;position:static!important;padding:0!important;background:#fff!important}body:has(#receiptPreview) #modalBody>p{display:none!important}body:has(#receiptPreview) .modal-card{box-shadow:none!important}body:has(#receiptPreview) .receipt-preview{width:auto!important;max-width:100%!important;max-height:95vh!important;object-fit:contain!important;break-inside:avoid;page-break-inside:avoid;margin:auto!important}}
