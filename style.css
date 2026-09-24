@@ -4,3 +4,7 @@
 .content{padding-bottom:calc(140px + env(safe-area-inset-bottom))}
 .bottom-nav button{touch-action:manipulation;min-height:62px}
 .bottom-nav button:focus-visible{outline:3px solid #2d6cc2;outline-offset:-3px}
+
+/* Preview struk portrait seperti desain yang disetujui, gambar lokal tanpa Firebase Storage. */
+.receipt-preview{display:block;width:min(100%,490px);height:auto;margin:0 auto;border:1px solid #e1e5eb;border-radius:4px;box-shadow:0 8px 24px #10274118;background:#fff}.receipt-wait{text-align:center;padding:35px;color:#64748b}.modal-card:has(.receipt-preview){width:min(100%,580px)}
+@media print{.receipt-preview{max-width:100%;width:100%;box-shadow:none;border:0}}

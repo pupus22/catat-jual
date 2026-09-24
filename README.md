@@ -23,3 +23,10 @@ Data yang sudah diinput saat Anonymous tetap berada di Firestore pada path `user
 - Jual Telur offline/online selain Shopee: harga jual terakhir per jenis otomatis diisikan hanya sebagai referensi dan dapat diganti pada transaksi apa pun. Jika belum pernah jual, kolom kosong dan wajib diisi ketika menyimpan. Harga aktual penjualan tersimpan di transaksi; berhasil menjual baru memperbarui harga terakhir.
 - Shopee: uang bersih diisi manual; tidak mengubah harga jual terakhir.
 - Perubahan ini hanya kode antarmuka dan transaksi. Tidak perlu mengganti Firebase config atau Firestore Rules dan tidak menghapus data lama.
+
+## Nota penjualan final (PNG lokal)
+- Buka Riwayat / Detail transaksi penjualan: aplikasi membuat ulang gambar nota secara lokal di browser menggunakan data transaksi Firestore dan logo `assets/logo.png`.
+- Desain putih, logo di atas, judul NOTA PENJUALAN, detail customer, rincian telur/tray/ongkir, total, dibayar, status LUNAS berwarna hijau. Jika masih bon, tampil sisa bon dan status BON BELUM LUNAS merah; bila lunas, bagian BON sama sekali tidak muncul. Tidak ada bagian Catatan.
+- Tombol **Kirim gambar WhatsApp** membuka menu berbagi Android jika browser mendukung file sharing; pilih WhatsApp dan penerima secara manual. Jika perangkat/browser tidak mendukung, PNG diunduh untuk dilampirkan manual ke WhatsApp. Tombol **Simpan PNG** menyimpan gambar ke perangkat.
+- Gambar struk TIDAK diunggah atau disimpan sebagai berkas di Firebase Storage / Firestore. Hanya data transaksi (termasuk field catatan internal yang sudah ada) disimpan di Firestore. Nota dikonstruksi ulang setiap dibuka. Berkas hasil berbagi tunduk pada penyimpanan perangkat/WhatsApp.
+- File `receipt.js` wajib diunggah bersamaan dengan `app.js`, `index.html`, `style.css` dan `assets/logo.png`. Tidak perlu mengubah Firestore Rules atau konfigurasi Firebase untuk fitur nota ini.
