@@ -37,3 +37,10 @@ Ringkasan stok, saldo dan laporan **diturunkan dari events**, bukan disimpan seb
 
 ## Revisi invoice tanpa ikon produk
 Invoice PNG menggunakan template krem dengan logo Cangkang Mas, alamat KEBRAON INDAH PERMAI D.38 SURABAYA, nomor telepon 0857-3192-9628 / 0813-5857-8824, tabel **teks saja** (nama barang, qty, harga, jumlah), total dan status pembayaran. Tidak ada ilustrasi atau ikon telur/tray/dus/plastik pada nota. Kolom BON hanya tampil bila masih ada sisa tagihan. PNG dibuat lokal di browser dan tidak diunggah ke Firebase. Isi nota diambil hanya dari data transaksi aplikasi yang benar-benar tersimpan, bukan data contoh pada visualisasi.
+
+## Revisi invoice ringkas + ikon aplikasi
+- Header invoice krem dengan logo asli diperbesar, alamat dan nomor telepon persis sesuai permintaan.
+- Tabel nama barang / QTY / harga / jumlah tanpa gambar produk. Hanya satu TOTAL; kolom DIBAYAR dan status LUNAS dihilangkan. SISA BON hanya muncul jika masih ada sisa tagihan. Tinggi PNG mengikuti jumlah baris; footer dekat total.
+- Ikon SVG terpasang pada navigasi bawah, tombol menu transaksi, dan tombol aksi utama aplikasi; ikon tidak dimasukkan ke nota.
+- Gambar invoice dibuat lokal di browser untuk cetak dan WhatsApp, tidak disimpan di Firebase.
+- Kode transaksi dan Firestore Rules tidak diubah oleh revisi tampilan ini. Pengujian langsung cetak printer dan WhatsApp pada HP tetap harus dilakukan sebelum pemakaian rutin.

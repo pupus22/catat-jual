@@ -40,3 +40,6 @@
     page-break-inside:avoid!important;
   }
 }
+
+/* Ikon konsisten khusus aplikasi. Nota PNG tetap berupa tabel teks. */
+.cm-svg{height:19px;width:19px;display:block;flex:none}.cm-nav-icon .cm-svg{height:23px;width:23px}.cm-with-icon{display:inline-flex;align-items:center;justify-content:center;gap:7px}.cm-button-icon{display:inline-flex;align-items:center;justify-content:center;flex:none}.action.cm-with-icon{display:flex;flex-direction:column;gap:9px}.action.cm-with-icon .cm-svg{width:26px;height:26px}.bottom-nav button .cm-nav-icon{display:flex;justify-content:center;align-items:center}.cm-with-icon .cm-svg{pointer-events:none}

@@ -3,7 +3,7 @@ import {getAuth,signInWithEmailAndPassword,signOut,setPersistence,browserLocalPe
 import {getFirestore,doc,collection,getDocsFromServer,onSnapshot,runTransaction} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {firebaseConfig} from './firebase-config.js';
 import {replay,integer,fmt,rupiah} from './engine.mjs?v=cm-v2-20260924-2';
-import {makeReceiptPNG,downloadReceipt,receiptFilename} from './receipt.js?v=cm-invoice-no-icons-20260924';
+import {makeReceiptPNG,downloadReceipt,receiptFilename} from './receipt.js?v=cm-invoice-compact-icons-20260924';
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const today=()=>{const d=new Date(),offset=d.getTimezoneOffset();return new Date(d.getTime()-offset*60000).toISOString().slice(0,10)};
 let auth,db,unsub,uid='',events=[],calc=replay([]),view='dashboard',modalAction=null,busy=false,loaded=false,month=today().slice(0,7),channel='all';
@@ -121,3 +121,59 @@ function csv(){const rows=[['Tanggal','Kategori','Pihak','Jenis telur','Berat','
 $('nav').onclick=e=>{const b=e.target.closest('[data-page]');if(!b)return;view=b.dataset.page;render();window.scrollTo(0,0)};
 async function boot(){const firebase=initializeApp(firebaseConfig);auth=getAuth(firebase);db=getFirestore(firebase);await setPersistence(auth,browserLocalPersistence);await auth.authStateReady();$('loading').hidden=true;onAuthStateChanged(auth,user=>{if(user&&!user.isAnonymous){if(uid===user.uid)return;uid=user.uid;unsub?.();loaded=false;events=[];$('login').hidden=true;$('app').hidden=false;$('sync').textContent='● Memuat data';unsub=onSnapshot(collection(db,'users',uid,'events'),snapshot=>{try{const incoming=normalized(snapshot);const next=replay(incoming);events=incoming;calc=next;loaded=true;$('sync').textContent=snapshot.metadata.fromCache?'● Cache lokal':'● Data Firebase';render()}catch(err){$('sync').textContent='● Periksa data';show('Data belum konsisten: '+err.message,true);console.error(err)}},err=>{$('sync').textContent='● Koneksi bermasalah';show('Gagal membaca Firebase: '+err.message,true)})}else{uid='';unsub?.();loaded=false;$('app').hidden=true;$('login').hidden=false}});$('loginForm').onsubmit=async e=>{e.preventDefault();$('loginBtn').disabled=true;$('loginMessage').textContent='Memeriksa akun...';try{await signInWithEmailAndPassword(auth,$('loginEmail').value.trim(),$('loginPassword').value);$('loginPassword').value=''}catch(err){$('loginMessage').textContent=err.code==='auth/invalid-credential'?'Email atau password salah.':err.message}finally{$('loginBtn').disabled=false}};$('logoutBtn').onclick=async()=>{if(confirm('Keluar dari browser ini?'))await signOut(auth)}}
 boot().catch(e=>{$('loading').hidden=true;$('login').hidden=false;$('loginMessage').textContent='Gagal memulai: '+e.message;console.error(e)});
+
+
+// Ikon aplikasi SVG lokal; invoice tidak memakai ikon menu maupun gambar produk.
+const iconPaths={
+ home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+ sale:'<path d="M3 4h2l2.2 10h11l2-7H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
+ stock:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/>',
+ report:'<path d="M4 20V10m5 10V4m5 16v-7m5 7V8"/>',
+ more:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+ purchase:'<path d="M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4"/>',
+ tray:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 12h18M9 5v14m6-14v14"/>',
+ return:'<path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-2"/>',
+ debt:'<rect x="2" y="6" width="20" height="15" rx="2"/><path d="M2 10h20M16 16h3"/>',
+ customer:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ edit:'<path d="m4 20 4-.8L20 7a2 2 0 0 0-3-3L5 16z"/>',
+ delete:'<path d="M4 7h16M10 4h4M6 7l1 14h10l1-14M10 11v6m4-6v6"/>',
+ save:'<path d="M5 3h13l3 3v15H3V3h2zm1 0v7h11V3M7 21v-8h10v8"/>',
+ print:'<path d="M6 9V3h12v6M6 18H4V9h16v9h-2M6 15h12v6H6zM17 12h1"/>',
+ whatsapp:'<path d="M20 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-4.6A8.5 8.5 0 1 1 20 11.5z"/><path d="M9 9c1 3 3 5 6 6l1.5-1.5"/>',
+ plus:'<path d="M12 4v16M4 12h16"/>',
+ download:'<path d="M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/>',
+ default:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>'
+};
+function smallIcon(name){return `<svg class="cm-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${iconPaths[name]||iconPaths.default}</svg>`;}
+function iconFor(b){const page=b.dataset.page;if(page)return {dashboard:'home',sale:'sale',stock:'stock',reports:'report',more:'more'}[page]||'default';
+ const type=b.dataset.new;if(type)return {purchase:'purchase',sale:'sale',tray:'tray',return:'return',settlement:'debt',expense:'debt',contact:'customer',product:'stock',adjust:'stock',initial:'plus'}[type]||'plus';
+ const label=(b.textContent||'').trim().toLowerCase();
+ if(b.dataset.delete||/hapus|batalkan input/.test(label))return 'delete';
+ if(b.dataset.edit||/edit|koreksi|kelola data/.test(label))return 'edit';
+ if(/whatsapp|bagikan/.test(label))return 'whatsapp';
+ if(/cetak/.test(label))return 'print';
+ if(/simpan png|ekspor|backup|unduh/.test(label))return 'download';
+ if(/simpan|konfirmasi|pulihkan/.test(label))return 'save';
+ if(/nota|invoice/.test(label))return 'print';
+ if(/bon|bayar|cicilan/.test(label))return 'debt';
+ if(/customer|supplier/.test(label))return 'customer';
+ if(/kulak/.test(label))return 'purchase';
+ if(/jual|penjualan/.test(label))return 'sale';
+ if(/tray/.test(label))return 'tray';
+ if(/retur/.test(label))return 'return';
+ if(/stok/.test(label))return 'stock';
+ if(/laporan/.test(label))return 'report';
+ if(/tambah|buat/.test(label))return 'plus';
+ return null;
+}
+function decorateIcons(){document.querySelectorAll('#app button,#modal button').forEach(b=>{
+ if(b.dataset.cmIconized)return;const kind=iconFor(b);if(!kind)return;
+ b.dataset.cmIconized='1';if(b.dataset.page){const old=b.querySelector('span');if(old){old.innerHTML=smallIcon(kind);old.classList.add('cm-nav-icon');}}else{
+  const holder=document.createElement('span');holder.className='cm-button-icon';holder.innerHTML=smallIcon(kind);b.prepend(holder);b.classList.add('cm-with-icon');
+ }
+ });}
+const cmIconObserver=new MutationObserver(()=>decorateIcons());
+cmIconObserver.observe(document.getElementById('app'),{childList:true,subtree:true});
+cmIconObserver.observe(document.getElementById('modal'),{childList:true,subtree:true});
+decorateIcons();
