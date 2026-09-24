@@ -52,3 +52,6 @@ Riwayat → Koreksi: penjualan dapat mengoreksi tanggal, harga/uang bersih Shope
 - Penjualan versi lama tanpa rincian lot FIFO `fifoConsumed` tidak dapat dibatalkan otomatis karena modal FIFO historis tidak dapat dibalik secara andal. Pengguna dapat memakai Koreksi yang sudah ada untuk kesalahan harga/tanggal dan perlu rekonsiliasi manual untuk kasus lain.
 - Kulak dengan pembelian tray ditolak untuk dibatalkan otomatis karena dapat mengubah biaya modal tray rata-rata. Kulak yang lot telurnya sudah terpakai juga ditolak.
 - Backup JSON sebelum melakukan koreksi/pembatalan penting. Jangan menghapus dokumen Firestore secara manual.
+
+## Revisi Kelola Data
+Tombol Edit dan Hapus transaksi hanya di Lainnya → Kelola Data. Riwayat, halaman Jual, Stok, dan detail Customer hanya menampilkan informasi/nota. Stok opname tersedia pada Kelola Data. Edit kategori Jenis Telur dan Customer/Supplier tersedia di Kelola Data. Edit dan Hapus transaksi Jual/Kulak tetap mengikuti pembatasan FIFO, tray, dan bon dari versi sebelumnya. Untuk transaksi tray, retur, cicilan, biaya operasional, serta koreksi stok, tombol Edit/Hapus tidak diaktifkan karena pembalikan yang aman belum diimplementasikan. Jangan menghapus langsung lewat Firestore.
