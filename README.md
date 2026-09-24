@@ -2,7 +2,7 @@
 
 Aplikasi mobile-first, tanpa formulir login; identitas Firebase anonim per browser. File: `index.html`, `style.css`, `app.js`, `firebase-config.js`, `firestore.rules`, dan `assets/logo.png`.
 
-## Pemasangan (tanpa halaman login)
+## Pemasangan (tanpa halaman login) — perbaikan sesi anonim
 
 1. Di Firebase Console proyek `cangkang-mas`, aktifkan **Authentication > Sign-in method > Anonymous** (sudah Anda lakukan).
 2. Buat **Cloud Firestore** jika belum dibuat; pilih production mode. Buka tab **Rules**, ganti semua isinya dengan file `firestore.rules` dari paket ini, lalu klik **Publish**. Jangan gunakan `allow read, write: if true`.
@@ -11,6 +11,22 @@ Aplikasi mobile-first, tanpa formulir login; identitas Firebase anonim per brows
 5. Buka **Settings > Pages**, pilih **Deploy from a branch**, `main`, `/(root)` lalu Save. Buka alamat GitHub Pages setelah deploy. Dashboard akan muncul tanpa form login.
 
 **PENTING: BATASAN TANPA LOGIN**: Setiap browser/perangkat membuat identitas Firebase anonim yang berbeda dan data terpisah. Membuka di HP lain, browser lain, mode incognito, atau menghapus data browser dapat membuat akun anonim baru sehingga data lama tidak terlihat. Jangan gunakan paket ini untuk keuangan produksi bila Anda perlu satu database bersama antara HP dan laptop atau akses eksklusif hanya pemilik. Anonymous Authentication tidak membuktikan bahwa pengunjung adalah pemilik, dan orang lain yang membuka website juga dapat membuat ruang data mereka sendiri (tetapi rules ini mencegah membaca data identitas anonim Anda). Untuk satu database pribadi yang sinkron antarperangkat, diperlukan autentikasi pemilik atau layanan backend dengan pengamanan tersendiri.
+
+## Mengapa akun Anonymous sebelumnya bisa banyak?
+
+Versi ini menunggu Firebase memulihkan sesi dari browser (`authStateReady`) dan
+menggunakan penyimpanan lokal (`browserLocalPersistence`) sebelum mencoba membuat akun.
+Satu pemanggilan awal dijaga agar tidak berulang pada halaman yang sama. Jika browser
+masih menyimpan UID lama tetapi sesi hilang, aplikasi **berhenti dengan pesan peringatan**
+alih-alih diam-diam membuat UID baru. Jangan hapus penyimpanan situs, menggunakan incognito,
+atau menghapus akun Anonymous yang masih dipakai. Tujuh akun lama di Console tidak otomatis
+dihapus; pastikan dulu mana yang berisi transaksi sebelum melakukan pembersihan.
+
+**Sinkronisasi HP dan laptop belum ada dalam versi ini**: `users/{uid}/...` memisahkan data
+per identitas. Mengizinkan dua UID di Rules **tidak** menyatukan datanya. Tidak ada cara
+aman untuk memastikan bahwa semua pengunjung anonim GitHub Pages adalah pemilik usaha;
+untuk satu ruang data privat lintas perangkat perlu autentikasi pemilik atau backend
+khusus dengan mekanisme akses/pairing yang aman.
 
 ## Cara menggunakan
 
@@ -40,3 +56,6 @@ Transaksi stok dan bon dijalankan dengan Firestore transaction: gagal jaringan t
 ## Pengembangan berikutnya
 
 Prioritas: penutupan hak penggantian supplier setelah lot pengganti masuk, tautan retur ke transaksi asal untuk atribusi laba per saluran, reversal transaksi, nota gambar/PDF dan restore backup. Jangan menganggap fungsi yang tercatat di bagian batasan sudah selesai.
+
+## Perbaikan navigasi & pemeriksaan
+Tombol Jual di navigasi bawah membuka form penjualan dan menggulir ke bagian atas. Semua halaman navigasi disetel demikian agar setelah menggulir Dashboard, halaman Jual tidak terlihat kosong di area bawah. Ruang bagian akhir konten ditambah agar tombol Simpan tidak tertutup navigasi HP. Validasi transaksi tetap dijalankan Firestore; tanpa koneksi ke proyek Firebase pribadi, tes lokal tidak mengonfirmasi transaksi benar-benar tersimpan.
