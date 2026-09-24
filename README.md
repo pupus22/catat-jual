@@ -34,3 +34,9 @@ Data yang sudah diinput saat Anonymous tetap berada di Firestore pada path `user
 
 ### Cetak ulang nota transaksi customer
 Buka Lainnya > Customer > Detail / bayar > Riwayat pembelian & nota > Lihat / cetak nota. Bisa juga dari Beranda > Riwayat terbaru > Detail atau Lainnya > Riwayat transaksi > Detail / nota. Tekan Cetak struk untuk membuka dialog cetak browser, Simpan PNG untuk mengunduh gambar, atau Kirim gambar WhatsApp untuk berbagi. Gambar hanya dibuat sementara di browser, tidak diunggah ke Firebase. Nota lama ditampilkan sesuai data pembayaran yang tercatat pada transaksi asal; cicilan sesudahnya tersimpan sebagai transaksi terpisah.
+
+### Perbaikan ukuran cetak nota di HP
+- Pratinjau nota pada layar HP dibatasi maksimum 320 px, tidak memenuhi seluruh layar.
+- Saat memilih **Cetak struk**, lebar hasil cetak dibatasi 72 mm (sesuai kertas struk 80 mm, dengan margin); tidak lagi mengikuti ukuran penuh A4/layar HP.
+- Jika menggunakan printer kertas 80 mm, pilih ukuran kertas 80 mm pada dialog cetak Android/printer apabila tersedia. Untuk kertas A4, nota tercetak kecil selebar struk pada kertas A4.
+- Tombol **Simpan PNG** dan **Kirim gambar WhatsApp** tetap menggunakan gambar asli resolusi tinggi. PNG nota tidak disimpan di Firebase.

@@ -11,3 +11,32 @@
 
 /* Cetak hanya gambar nota yang sedang dibuka, bukan dashboard di belakangnya. */
 @media print{body:has(#receiptPreview) #app,body:has(#receiptPreview) #loading,body:has(#receiptPreview) #login{display:none!important}body:has(#receiptPreview) #modal{display:block!important;position:static!important;padding:0!important;background:#fff!important}body:has(#receiptPreview) #modalBody>p{display:none!important}body:has(#receiptPreview) .modal-card{box-shadow:none!important}body:has(#receiptPreview) .receipt-preview{width:auto!important;max-width:100%!important;max-height:95vh!important;object-fit:contain!important;break-inside:avoid;page-break-inside:avoid;margin:auto!important}}
+
+/* Perbaikan ukuran nota di HP dan saat mencetak. Gambar PNG sumber tetap resolusi tinggi. */
+@media screen {
+  .modal-card:has(.receipt-preview) { width:min(100%,420px); }
+  .receipt-preview { width:min(100%,320px); max-width:320px; height:auto; }
+}
+@media print {
+  @page { margin:4mm; }
+  html, body { margin:0!important; padding:0!important; background:#fff!important; }
+  body:has(#receiptPreview) #modal,
+  body:has(#receiptPreview) .modal-card,
+  body:has(#receiptPreview) #modalBody { width:100%!important; min-width:0!important; max-width:none!important; height:auto!important; max-height:none!important; margin:0!important; padding:0!important; overflow:visible!important; background:#fff!important; border:0!important; box-shadow:none!important; }
+  body:has(#receiptPreview) .receipt-preview {
+    display:block!important;
+    width:72mm!important;
+    min-width:0!important;
+    max-width:72mm!important;
+    height:auto!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    object-fit:contain!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+}
