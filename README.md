@@ -59,3 +59,7 @@ Prioritas: penutupan hak penggantian supplier setelah lot pengganti masuk, tauta
 
 ## Perbaikan navigasi & pemeriksaan
 Tombol Jual di navigasi bawah membuka form penjualan dan menggulir ke bagian atas. Semua halaman navigasi disetel demikian agar setelah menggulir Dashboard, halaman Jual tidak terlihat kosong di area bawah. Ruang bagian akhir konten ditambah agar tombol Simpan tidak tertutup navigasi HP. Validasi transaksi tetap dijalankan Firestore; tanpa koneksi ke proyek Firebase pribadi, tes lokal tidak mengonfirmasi transaksi benar-benar tersimpan.
+
+## Hotfix tombol Jual (24 September 2026)
+
+Memperbaiki `TypeError: trayOptions is not a function` pada `saleForm()` dengan menggunakan daftar pilihan `trayOptions` secara langsung. Ganti file `app.js` versi lama dengan versi dalam paket ini; file lainnya dapat dipertahankan. Tidak perlu mengubah konfigurasi Firebase maupun Firestore Rules. Setelah GitHub Pages terbit, muat ulang tanpa cache. Pengujian sintaks JavaScript berhasil; pengujian end-to-end browser dan penyimpanan ke Firebase produksi belum diverifikasi pada lingkungan ini.
