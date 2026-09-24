@@ -1,57 +1,37 @@
-# Cangkang Mas — versi login tetap (GitHub Pages + Firebase)
+# Cangkang Mas — paket perbaikan fondasi (BELUM RILIS PRODUKSI)
 
-## Sebelum memasang: data lama penting
-Data yang sudah diinput saat Anonymous tetap berada di Firestore pada path `users/{UID_ANONIM}/...`. Versi login memakai `users/{UID_EMAIL}/...`: **data lama tidak otomatis berpindah dan tidak akan muncul sampai dimigrasikan**. Jangan hapus akun Anonymous, koleksi, cache browser, atau ganti Rules terlebih dahulu. Simpan salinan data lama melalui Firebase Console / ekspor ketika sesi anonim yang benar masih dapat membukanya. Bila ada data terpisah di HP dan laptop, keduanya harus diperiksa dan digabung tanpa menduplikasi transaksi.
+Paket ini merupakan **revisi parsial yang diuji dengan simulasi lokal**, bukan pernyataan bahwa semua fitur dan koreksi historis telah selesai. Jangan langsung mengganti aplikasi aktif yang sudah berisi transaksi asli dengan paket ini sebelum backup dan uji di proyek Firebase terpisah.
 
-## Pengaturan Firebase
-1. Authentication > Sign-in method: aktifkan **Email/Password**. Anonymous boleh tetap aktif untuk pemulihan data lama; versi ini tidak membuat sesi Anonymous baru.
-2. Authentication > Users > Add user: buat **satu akun email dan password** untuk pemilik. Jangan memasukkan password ke kode HTML/JavaScript atau repository GitHub.
-3. Firestore > Rules: file `firestore.rules` ini hanya memberi akses ke dokumen `users/{UID_EMAIL}/...` untuk akun Email/Password pemilik UID tersebut. **JANGAN publish rules baru sebelum data Anonymous lama dicadangkan/dipulihkan**, karena aturan ini akan menolak akses dari sesi Anonymous lama.
-4. Unggah isi folder aplikasi ke root repository GitHub Pages (bukan ZIP), lalu buka website dan login sekali di tiap browser. Firebase menyimpan sesi dengan `browserLocalPersistence`, sehingga reload atau tutup/buka browser biasa tidak meminta login ulang selama sesi masih berlaku. Browser incognito, hapus data situs, sign out, atau pencabutan sesi dapat memerlukan login ulang.
-5. HP dan laptop harus login dengan **email yang sama** agar memakai path Firestore UID yang sama dan sinkron otomatis.
+## Perbaikan yang DIIMPLEMENTASIKAN
 
-## Data dan keamanan
-- File `firebase-config.js` memuat konfigurasi web publik, **bukan password akun**.
-- Form login tidak memiliki tombol daftar publik; buat akun hanya melalui Firebase Console.
-- Jangan membuat stok awal baru atau mengulang transaksi lama di akun baru sebelum pemulihan data dari kedua perangkat selesai.
-- Login tidak memindahkan dokumen Anonymous lama. Pemulihan perlu ekspor/penyalinan terverifikasi beserta relasi transaksi, stok, saldo tray, dan cicilan.
-- Format angka titik pemisah ribuan, berat gram bilangan bulat, FIFO dan fitur bisnis lainnya tidak diubah pada revisi login ini.
+- Sesi login Email/Password tetap dipertahankan; akun anonim tidak dibuat.
+- Simpan ganda akibat dua kali menekan Simpan dicegah di antarmuka; kulak dan penjualan memakai ID operasi stabil selama form yang sama masih terbuka, sehingga pengulangan setelah respons jaringan tidak pasti tidak membuat transaksi baru. Pembayaran bon juga memakai ID operasi stabil.
+- Pembayaran bon memilih **nota tertentu**, mengurangi sisa bon nota dan saldo customer dalam satu transaksi Firestore. Nota cetak ulang menampilkan nilai pembayaran terbaru. Bon lama yang pernah dicicil tanpa alokasi per nota harus direkonsiliasi terlebih dahulu; aplikasi menolak pembayaran baru jika saldo total tidak cocok dengan jumlah saldo nota.
+- Ringkasan Shopee memperhitungkan tray dibeli sekali; nota Shopee tidak mengulang baris penerimaan bersih dua kali.
+- Form penjualan tidak dihapus oleh update data real-time saat sedang diisi.
+- Kesalahan stok tray saat tukar menampilkan saldo dan cara mencatat stok awal/opname.
+- Format angka tetap titik sebagai pemisah ribuan; gram dan rupiah ditampilkan bulat. Logo serta desain nota tetap.
+- Firestore Rules pada paket hanya mengizinkan UID akun Email/Password pemilik yang sebelumnya diberikan, pada ruang data UID sendiri. Jangan menimpa Rules yang telah dipersonalisasi tanpa memeriksa UID-nya.
 
-## Revisi harga harian
-- Tambah/Edit Jenis Telur: cukup nama dan status, tidak wajib memasukkan harga, tidak mengubah modal atau harga transaksi lama.
-- Kulak Telur: harga beli per kg wajib diisi setiap transaksi, batch FIFO tetap sesuai nilai kulak aktual.
-- Jual Telur offline/online selain Shopee: harga jual terakhir per jenis otomatis diisikan hanya sebagai referensi dan dapat diganti pada transaksi apa pun. Jika belum pernah jual, kolom kosong dan wajib diisi ketika menyimpan. Harga aktual penjualan tersimpan di transaksi; berhasil menjual baru memperbarui harga terakhir.
-- Shopee: uang bersih diisi manual; tidak mengubah harga jual terakhir.
-- Perubahan ini hanya kode antarmuka dan transaksi. Tidak perlu mengganti Firebase config atau Firestore Rules dan tidak menghapus data lama.
+## MASIH BELUM SELESAI — jangan gunakan fitur ini pada data penting
 
-## Nota penjualan final (PNG lokal)
-- Buka Riwayat / Detail transaksi penjualan: aplikasi membuat ulang gambar nota secara lokal di browser menggunakan data transaksi Firestore dan logo `assets/logo.png`.
-- Desain putih, logo di atas, judul NOTA PENJUALAN, detail customer, rincian telur/tray/ongkir, total, dibayar, status LUNAS berwarna hijau. Jika masih bon, tampil sisa bon dan status BON BELUM LUNAS merah; bila lunas, bagian BON sama sekali tidak muncul. Tidak ada bagian Catatan.
-- Tombol **Kirim gambar WhatsApp** membuka menu berbagi Android jika browser mendukung file sharing; pilih WhatsApp dan penerima secara manual. Jika perangkat/browser tidak mendukung, PNG diunduh untuk dilampirkan manual ke WhatsApp. Tombol **Simpan PNG** menyimpan gambar ke perangkat.
-- Gambar struk TIDAK diunggah atau disimpan sebagai berkas di Firebase Storage / Firestore. Hanya data transaksi (termasuk field catatan internal yang sudah ada) disimpan di Firestore. Nota dikonstruksi ulang setiap dibuka. Berkas hasil berbagi tunduk pada penyimpanan perangkat/WhatsApp.
-- File `receipt.js` wajib diunggah bersamaan dengan `app.js`, `index.html`, `style.css` dan `assets/logo.png`. Tidak perlu mengubah Firestore Rules atau konfigurasi Firebase untuk fitur nota ini.
+1. Edit/Hapus **seluruh kategori** belum diimplementasikan: menu Kelola Data masih memiliki batasan lama.
+2. Rekalkulasi FIFO historis setelah mengedit berat/harga/tanggal kulak lama atau menghapus transaksi yang sudah memiliki transaksi lanjutan **belum selesai**.
+3. Pencatatan tray kosong vs tray yang sedang berisi telur belum dipisahkan sepenuhnya. Stok awal fisik harus dicatat sesuai kenyataan.
+4. Retur customer ↔ supplier, penggantian, dan pembalikan kas ketika membatalkan penjualan lunas belum direkonsiliasi penuh.
+5. Laporan laba lintas bulan dan alokasi biaya bersama belum diaudit tuntas.
+6. Belum diuji pada Firebase produksi/HP Anda; simulasi lokal tidak membuktikan kondisi jaringan, Rules, atau kompatibilitas data lama.
 
+## Menguji tanpa mengubah transaksi asli
 
-### Cetak ulang nota transaksi customer
-Buka Lainnya > Customer > Detail / bayar > Riwayat pembelian & nota > Lihat / cetak nota. Bisa juga dari Beranda > Riwayat terbaru > Detail atau Lainnya > Riwayat transaksi > Detail / nota. Tekan Cetak struk untuk membuka dialog cetak browser, Simpan PNG untuk mengunduh gambar, atau Kirim gambar WhatsApp untuk berbagi. Gambar hanya dibuat sementara di browser, tidak diunggah ke Firebase. Nota lama ditampilkan sesuai data pembayaran yang tercatat pada transaksi asal; cicilan sesudahnya tersimpan sebagai transaksi terpisah.
+1. Ekspor cadangan JSON dari aplikasi aktif. Simpan juga cadangan Firestore yang dapat dipulihkan; JSON browser hanya ekspor isi tampilan saat itu, bukan backup database terverifikasi.
+2. Buat **proyek Firebase terpisah untuk pengujian**; ganti hanya `firebase-config.js` dan sesuaikan `firestore.rules` dengan UID akun pengujian.
+3. Unggah isi folder `cangkang-mas` ke GitHub Pages repo uji. Jangan campur file lama dan baru.
+4. Uji kulak → jual → tukar tray → cicil bon → cetak ulang nota, lalu bandingkan stok, bon, dan laba dengan perhitungan manual.
+5. Jangan memindahkan aplikasi aktif sebelum semua skenario pada bagian 'MASIH BELUM SELESAI' diperbaiki dan diverifikasi dengan salinan data sesungguhnya.
 
-### Perbaikan ukuran cetak nota di HP
-- Pratinjau nota pada layar HP dibatasi maksimum 320 px, tidak memenuhi seluruh layar.
-- Saat memilih **Cetak struk**, lebar hasil cetak dibatasi 72 mm (sesuai kertas struk 80 mm, dengan margin); tidak lagi mengikuti ukuran penuh A4/layar HP.
-- Jika menggunakan printer kertas 80 mm, pilih ukuran kertas 80 mm pada dialog cetak Android/printer apabila tersedia. Untuk kertas A4, nota tercetak kecil selebar struk pada kertas A4.
-- Tombol **Simpan PNG** dan **Kirim gambar WhatsApp** tetap menggunakan gambar asli resolusi tinggi. PNG nota tidak disimpan di Firebase.
+## Pengujian otomatis lokal
 
+Skrip `tests/smoke.cjs` menguji simulasi perhitungan dan penyimpanan atomik tiruan. Jalankan `node tests/smoke.cjs`. Simulasi ini **bukan** pengujian Firestore sebenarnya.
 
-## Koreksi transaksi (rilis terbatas, aman untuk FIFO)
-Riwayat → Koreksi: penjualan dapat mengoreksi tanggal, harga/uang bersih Shopee, ongkir, biaya dan pembayaran awal. Tidak menggandakan omzet; log koreksi disimpan. Untuk kulak: tanggal bisa diubah; harga dan ongkir hanya bisa dikoreksi bila lot kulak versi baru masih utuh dan belum ada transaksi telur berikutnya. Berat, jenis telur, tray dan customer belum bisa dikoreksi dengan aman: aplikasi menolak perubahan tersebut. Untuk kulak versi lama tanpa identitas lot, modal tidak bisa diedit langsung. Jangan gunakan Koreksi Stok untuk memperbaiki transaksi lama. Cadangkan data sebelum memasang revisi.
-
-## Hapus transaksi (pembatalan aman)
-- Buka Riwayat → pilih transaksi kulak atau jual → Hapus. Fitur Koreksi tetap tersedia.
-- Hapus meminta alasan dan konfirmasi. Data asli tidak dihapus secara fisik dari Firestore: diberi tanda `cancelledAt`, dengan entri audit `cancellation`; laporan dan riwayat aktif tidak menghitung transaksi batal.
-- Pembalikan stok telur, tray, dan saldo bon dilakukan atomik pada transaksi Firestore. Pembatalan otomatis ditolak bila transaksi tidak terakhir untuk jenis telur, terkait pembayaran/retur/tray berikutnya, atau saldo tidak cukup.
-- Penjualan versi lama tanpa rincian lot FIFO `fifoConsumed` tidak dapat dibatalkan otomatis karena modal FIFO historis tidak dapat dibalik secara andal. Pengguna dapat memakai Koreksi yang sudah ada untuk kesalahan harga/tanggal dan perlu rekonsiliasi manual untuk kasus lain.
-- Kulak dengan pembelian tray ditolak untuk dibatalkan otomatis karena dapat mengubah biaya modal tray rata-rata. Kulak yang lot telurnya sudah terpakai juga ditolak.
-- Backup JSON sebelum melakukan koreksi/pembatalan penting. Jangan menghapus dokumen Firestore secara manual.
-
-## Revisi Kelola Data
-Tombol Edit dan Hapus transaksi hanya di Lainnya → Kelola Data. Riwayat, halaman Jual, Stok, dan detail Customer hanya menampilkan informasi/nota. Stok opname tersedia pada Kelola Data. Edit kategori Jenis Telur dan Customer/Supplier tersedia di Kelola Data. Edit dan Hapus transaksi Jual/Kulak tetap mengikuti pembatasan FIFO, tray, dan bon dari versi sebelumnya. Untuk transaksi tray, retur, cicilan, biaya operasional, serta koreksi stok, tombol Edit/Hapus tidak diaktifkan karena pembalikan yang aman belum diimplementasikan. Jangan menghapus langsung lewat Firestore.
+Gambar nota PNG dihasilkan di browser dan **tidak disimpan ke Firebase**.

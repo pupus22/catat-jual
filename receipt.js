@@ -44,7 +44,7 @@ export async function makeReceiptPNG(entry){
   rows.push({name:`Telur ${clean(entry.productName||'')}`,qty:`${idFmt(weight)} gram`,price:isShopee?'—':idRupiah(price),subtotal:idRupiah(eggTotal)});
   if(trayOut>0)rows.push({name:trayBought===trayOut?'Tray (beli)':trayBought>0?'Tray (tukar + beli)':entry.trayMode==='loan'?'Tray (pinjam)':'Tray (tukar)',qty:`${idFmt(trayOut)} pcs`,price:trayBought?idRupiah(entry.trayPrice):'—',subtotal:idRupiah(trayCost)});
   if(delivery>0) rows.push({name:'Ongkir',qty:'—',price:'—',subtotal:idRupiah(delivery)});
-  if(isShopee)rows.push({name:'Penerimaan Shopee',qty:'—',price:'—',subtotal:idRupiah(entry.revenue||0),shopee:true});
+  // Penerimaan bersih Shopee sudah menjadi total baris telur; jangan tampilkan lagi sebagai baris kedua.
   let y=680;
   rows.forEach((row,i)=>{
     text(String(i+1),L+20,y,22);
