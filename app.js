@@ -3,7 +3,7 @@ import {getAuth,signInWithEmailAndPassword,signOut,setPersistence,browserLocalPe
 import {getFirestore,doc,collection,getDocsFromServer,onSnapshot,runTransaction} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {firebaseConfig} from './firebase-config.js';
 import {replay,integer,fmt,rupiah} from './engine.mjs?v=cm-v2-20260924-2';
-import {makeReceiptPNG,downloadReceipt,receiptFilename} from './receipt.js?v=cm-invoice-compact-icons-20260924';
+import {makeReceiptPNG,downloadReceipt,receiptFilename} from './receipt.js?v=cm-invoice-modern-20260924';
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const today=()=>{const d=new Date(),offset=d.getTimezoneOffset();return new Date(d.getTime()-offset*60000).toISOString().slice(0,10)};
 let auth,db,unsub,uid='',events=[],calc=replay([]),view='dashboard',modalAction=null,busy=false,loaded=false,month=today().slice(0,7),channel='all';

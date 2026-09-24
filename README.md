@@ -44,3 +44,9 @@ Invoice PNG menggunakan template krem dengan logo Cangkang Mas, alamat KEBRAON I
 - Ikon SVG terpasang pada navigasi bawah, tombol menu transaksi, dan tombol aksi utama aplikasi; ikon tidak dimasukkan ke nota.
 - Gambar invoice dibuat lokal di browser untuk cetak dan WhatsApp, tidak disimpan di Firebase.
 - Kode transaksi dan Firestore Rules tidak diubah oleh revisi tampilan ini. Pengujian langsung cetak printer dan WhatsApp pada HP tetap harus dilakukan sebelum pemakaian rutin.
+
+## Revisi invoice modern (desain disetujui)
+- Template krem modern, huruf Arial/sans-serif konsisten, logo asli besar di header, alamat dan nomor telepon usaha, daftar barang tanpa ikon produk, dan kotak total merah.
+- `DIBAYAR` dan `LUNAS` tidak ditampilkan; `SISA BON` hanya jika ada saldo tagihan.
+- Footer Cangkang Mas dan tulisan `THANK YOU FOR YOUR BUSINESS!` dimuat sepenuhnya dalam ukuran gambar dinamis; gambar dibuat di browser saja dan tidak diunggah ke Firebase.
+- Tidak ada perubahan pada proses login, skema Firestore, transaksi, FIFO, ataupun ikon aplikasi. Untuk menghindari cache versi lama, referensi aset HTML/JS/CSS diberi versi baru.
