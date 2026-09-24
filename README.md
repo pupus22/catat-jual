@@ -34,3 +34,6 @@ users/{ownerUid}/audit/{auditId}    # riwayat before/after dan alasan koreksi
 users/{ownerUid}/meta/revision     # pengaman urutan penyimpanan antarperangkat
 ```
 Ringkasan stok, saldo dan laporan **diturunkan dari events**, bukan disimpan sebagai angka salinan yang rawan tidak sinkron. Browser membaca seluruh histori untuk perhitungan; untuk volume data sangat besar atau multiuser perlu arsitektur backend khusus. Konfigurasi ini ditujukan untuk satu pemilik usaha sebagaimana diminta.
+
+## Revisi invoice tanpa ikon produk
+Invoice PNG menggunakan template krem dengan logo Cangkang Mas, alamat KEBRAON INDAH PERMAI D.38 SURABAYA, nomor telepon 0857-3192-9628 / 0813-5857-8824, tabel **teks saja** (nama barang, qty, harga, jumlah), total dan status pembayaran. Tidak ada ilustrasi atau ikon telur/tray/dus/plastik pada nota. Kolom BON hanya tampil bila masih ada sisa tagihan. PNG dibuat lokal di browser dan tidak diunggah ke Firebase. Isi nota diambil hanya dari data transaksi aplikasi yang benar-benar tersimpan, bukan data contoh pada visualisasi.
