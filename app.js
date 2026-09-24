@@ -1,5 +1,5 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-import {getAuth,signInAnonymously,setPersistence,browserLocalPersistence} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {getFirestore,collection,doc,addDoc,setDoc,getDoc,getDocs,onSnapshot,runTransaction,query,orderBy,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {firebaseConfig} from './firebase-config.js';
 const $=id=>document.getElementById(id), money=n=>'Rp'+fmt(Math.round(Number(n)||0)),fmt=n=>Math.round(Number(n)||0).toLocaleString('id-ID'), num=v=>{let s=String(v??'').trim();if(!s)return 0;if(!/^\d{1,3}(\.\d{3})*$|^\d+$/.test(s))throw Error('Angka harus bulat. Gunakan titik hanya untuk ribuan, contoh 15.000.');return Number(s.replaceAll('.',''))}, val=id=>$(id)?.value??'', nval=id=>num(val(id)), h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])), today=()=>new Date().toLocaleDateString('en-CA'), uid=()=>auth.currentUser?.uid, now=()=>new Date().toISOString();
@@ -53,44 +53,55 @@ async function recordSettlement(id){let c=contact(id),mode=val('qMode'),amount=n
 function exportCSV(){let es=state.entries.filter(e=>e.date?.startsWith(selectedMonth)),rows=[['Tanggal','Jenis','Pihak','Saluran','Produk','Gram','Tray Keluar','Tray Masuk','Pendapatan','HPP','Biaya','Laba','Catatan'],...es.map(e=>[e.date,e.label,e.partyName,e.channel,e.productName,e.weight,e.trayOut,e.trayIn,e.revenue,e.cogs,e.cost,e.profit,e.note])];download('cangkang-mas-'+selectedMonth+'.csv','\ufeff'+rows.map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(';')).join('\r\n'),'text/csv;charset=utf-8')}
 function exportJSON(){download('cangkang-mas-backup-'+today()+'.json',JSON.stringify({exportedAt:now(),products:state.products,contacts:state.contacts,entries:state.entries,tray:state.tray},null,2),'application/json')}
 function download(name,body,mime){let url=URL.createObjectURL(new Blob([body],{type:mime})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}
-// Jalankan inisialisasi sekali pada setiap pembukaan halaman. Firebase menyimpan sesi
-// anonim secara lokal, sehingga reload tidak membuat akun baru selama sesi masih ada.
-let startupPromise;
-async function startApp(){
-  if(startupPromise)return startupPromise;
-  startupPromise=(async()=>{
-    if(firebaseConfig.apiKey.startsWith('ISI_') || firebaseConfig.projectId.startsWith('ISI_'))
-      throw Error('Firebase belum dikonfigurasi. Isi firebase-config.js.');
-    firebase=initializeApp(firebaseConfig);
-    auth=getAuth(firebase);
-    db=getFirestore(firebase);
-    await setPersistence(auth,browserLocalPersistence);
-    // Tunggu pemulihan sesi dari penyimpanan browser sebelum memutuskan membuat akun.
-    await auth.authStateReady();
-    let user=auth.currentUser;
-    if(!user){
-      const previousUid=localStorage.getItem('cm-anonymous-uid');
-      if(previousUid){
-        throw Error('Sesi anonim lama tidak tersedia di browser ini. Jangan membuat akun baru: data lama bisa tidak terlihat. Gunakan browser semula atau pulihkan akses terlebih dahulu. UID sebelumnya: '+previousUid);
-      }
-      const result=await signInAnonymously(auth);
-      user=result.user;
-    }
-    if(!user?.isAnonymous)throw Error('Sesi Firebase bukan akun anonim. Periksa pengaturan autentikasi.');
-    const previousUid=localStorage.getItem('cm-anonymous-uid');
-    if(previousUid && previousUid!==user.uid)
-      throw Error('Identitas anonim browser berubah. UID lama: '+previousUid+'. Data lama tidak otomatis berpindah.');
-    localStorage.setItem('cm-anonymous-uid',user.uid);
-    $('loading').hidden=true;
-    $('app').hidden=false;
-    watchers();
-    console.info('Cangkang Mas: sesi anonim digunakan kembali. UID:',user.uid);
-  })();
-  return startupPromise;
-}
-startApp().catch(err=>{
+// Sesi Email/Password disimpan melalui Firebase browserLocalPersistence.
+// Data anonim lama TIDAK dihapus atau dipindahkan otomatis.
+let startupPromise,activeUid=null;
+function showLogin(message=''){
+  $('loading').hidden=true;
   $('app').hidden=true;
-  $('loading').hidden=false;
-  $('loadingMessage').textContent='Tidak dapat membuka aplikasi: '+(err.message||String(err));
-  console.error('Cangkang Mas startup:',err);
-});
+  $('login').hidden=false;
+  $('loginMessage').textContent=message;
+}
+function showWorkspace(user){
+  if(activeUid===user.uid)return;
+  unsubs.forEach(fn=>fn());unsubs=[];
+  activeUid=user.uid;
+  state={products:[],contacts:[],entries:[],reportChannel:'all',tray:{available:0,broken:0,unitCost:0}};
+  $('login').hidden=true;
+  $('loading').hidden=true;
+  $('app').hidden=false;
+  watchers();
+}
+async function startApp(){
+ if(startupPromise)return startupPromise;
+ startupPromise=(async()=>{
+  if(firebaseConfig.apiKey.startsWith('ISI_')||firebaseConfig.projectId.startsWith('ISI_'))throw Error('Firebase belum dikonfigurasi.');
+  firebase=initializeApp(firebaseConfig);auth=getAuth(firebase);db=getFirestore(firebase);
+  await setPersistence(auth,browserLocalPersistence);
+  await auth.authStateReady();
+  let user=auth.currentUser;
+  if(user && !user.isAnonymous){showWorkspace(user)}
+  else {
+    // Sesi anonim sebelumnya tetap ada di Firebase hingga pengguna masuk dengan akun tetap.
+    // Jangan otomatis sign out/menulis/menghapus koleksi anonim lama.
+    showLogin(user?.isAnonymous?'Anda masih menggunakan sesi anonim lama. Masuk dengan akun tetap untuk data baru. Data anonim lama tidak otomatis berpindah.':'Masuk sekali; sesi akan tersimpan di browser ini.');
+  }
+  onAuthStateChanged(auth,u=>{
+    if(u&&!u.isAnonymous){showWorkspace(u)}
+    else if(activeUid){activeUid=null;unsubs.forEach(fn=>fn());unsubs=[];showLogin('Sesi berakhir. Silakan masuk kembali.')}
+  });
+  $('loginForm').addEventListener('submit',async e=>{
+   e.preventDefault();const btn=$('loginBtn');btn.disabled=true;$('loginMessage').textContent='Memeriksa akun…';
+   try {
+    const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
+    if(!email||!password)throw Error('Isi email dan password.');
+    const cred=await signInWithEmailAndPassword(auth,email,password);
+    if(cred.user.isAnonymous)throw Error('Akun tetap diperlukan.');
+    $('loginPassword').value='';showWorkspace(cred.user);
+   }catch(err){console.error('Gagal masuk:',err.code||err.message);$('loginMessage').textContent=err.code==='auth/invalid-credential'?'Email atau password tidak cocok.':err.code==='auth/too-many-requests'?'Terlalu banyak percobaan. Coba lagi nanti.':err.message||'Gagal masuk.'}
+   finally{btn.disabled=false}
+  });
+  $('logoutBtn').addEventListener('click',async()=>{if(confirm('Keluar dari aplikasi di browser ini?'))await signOut(auth)});
+ })();return startupPromise;
+}
+startApp().catch(err=>{showLogin('Tidak dapat memulai aplikasi: '+(err.message||String(err)));console.error('Cangkang Mas startup:',err)});

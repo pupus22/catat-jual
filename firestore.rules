@@ -1,12 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Setiap sesi anonim hanya bisa mengakses datanya sendiri.
-    // Ini BUKAN proteksi bahwa hanya pemilik usaha dapat membuka aplikasi.
+    // Pengguna login hanya boleh membaca dan menulis ruang UID sendiri.
+    // Akun Anonymous lama tidak dihapus: pemulihan data perlu proses terpisah.
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null
-        && request.auth.token.firebase.sign_in_provider == 'anonymous'
-        && request.auth.uid == userId;
+        && request.auth.uid == userId
+        && request.auth.token.firebase.sign_in_provider == 'password';
     }
   }
 }
