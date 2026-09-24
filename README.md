@@ -16,3 +16,10 @@ Data yang sudah diinput saat Anonymous tetap berada di Firestore pada path `user
 - Jangan membuat stok awal baru atau mengulang transaksi lama di akun baru sebelum pemulihan data dari kedua perangkat selesai.
 - Login tidak memindahkan dokumen Anonymous lama. Pemulihan perlu ekspor/penyalinan terverifikasi beserta relasi transaksi, stok, saldo tray, dan cicilan.
 - Format angka titik pemisah ribuan, berat gram bilangan bulat, FIFO dan fitur bisnis lainnya tidak diubah pada revisi login ini.
+
+## Revisi harga harian
+- Tambah/Edit Jenis Telur: cukup nama dan status, tidak wajib memasukkan harga, tidak mengubah modal atau harga transaksi lama.
+- Kulak Telur: harga beli per kg wajib diisi setiap transaksi, batch FIFO tetap sesuai nilai kulak aktual.
+- Jual Telur offline/online selain Shopee: harga jual terakhir per jenis otomatis diisikan hanya sebagai referensi dan dapat diganti pada transaksi apa pun. Jika belum pernah jual, kolom kosong dan wajib diisi ketika menyimpan. Harga aktual penjualan tersimpan di transaksi; berhasil menjual baru memperbarui harga terakhir.
+- Shopee: uang bersih diisi manual; tidak mengubah harga jual terakhir.
+- Perubahan ini hanya kode antarmuka dan transaksi. Tidak perlu mengganti Firebase config atau Firestore Rules dan tidak menghapus data lama.
