@@ -1,12 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // GANTI UID_PEMILIK dengan UID akun Anda pada Firebase Authentication > Users.
-    // Hanya pemilik ini yang boleh membaca/menulis data usahanya.
+    // Setiap sesi anonim hanya bisa mengakses datanya sendiri.
+    // Ini BUKAN proteksi bahwa hanya pemilik usaha dapat membuka aplikasi.
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null
-        && request.auth.uid == userId
-        && request.auth.uid == 'UID_PEMILIK';
+        && request.auth.token.firebase.sign_in_provider == 'anonymous'
+        && request.auth.uid == userId;
     }
   }
 }

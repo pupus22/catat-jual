@@ -1,22 +1,16 @@
 # Cangkang Mas — Web App GitHub Pages + Firebase
 
-Aplikasi satu pengguna, mobile-first. File: `index.html`, `style.css`, `app.js`, `firebase-config.js`, `firestore.rules`, dan `assets/logo.png`.
+Aplikasi mobile-first, tanpa formulir login; identitas Firebase anonim per browser. File: `index.html`, `style.css`, `app.js`, `firebase-config.js`, `firestore.rules`, dan `assets/logo.png`.
 
-## Pasang Firebase
+## Pemasangan (tanpa halaman login)
 
-1. Buka https://console.firebase.google.com/ lalu buat proyek (atau pilih proyek Anda).
-2. Pada **Build > Authentication > Sign-in method**, aktifkan **Email/Password**. Pada **Users**, tambahkan akun email/password Anda sendiri. Aplikasi **tidak** menyediakan halaman pendaftaran publik.
-3. Pada **Build > Firestore Database**, buat database. Mulai dengan mode production (aturan awal akan menolak akses sampai rules dipasang).
-4. Dari **Project settings > Your apps**, daftarkan **Web App** dan salin isi `firebaseConfig` ke `firebase-config.js` (ganti semua `ISI_...`). Jangan pernah menaruh password akun Firebase di file ini.
-5. Di **Authentication > Users**, salin **User UID** akun Anda. Buka `firestore.rules`, ganti `UID_PEMILIK` dengan UID tersebut, lalu tempel dan **Publish** di tab Firestore Database > Rules. Aturan tersebut membuat database hanya dapat dibaca/ditulis oleh akun pemilik. Buat UID aturan berbeda bila Anda memang ingin mengganti pemilik.
-6. Pada Firebase Authentication > Settings > Authorized domains, tambahkan domain GitHub Pages Anda, misalnya `namaakun.github.io` jika belum ada.
+1. Di Firebase Console proyek `cangkang-mas`, aktifkan **Authentication > Sign-in method > Anonymous** (sudah Anda lakukan).
+2. Buat **Cloud Firestore** jika belum dibuat; pilih production mode. Buka tab **Rules**, ganti semua isinya dengan file `firestore.rules` dari paket ini, lalu klik **Publish**. Jangan gunakan `allow read, write: if true`.
+3. Konfigurasi Firebase proyek `cangkang-mas` sudah dimasukkan ke `firebase-config.js` di paket ini.
+4. Unggah **seluruh ISI folder** `cangkang-mas` ke root repository GitHub Anda, termasuk `index.html`, `app.js`, `firebase-config.js`, `firestore.rules`, `style.css`, dan folder `assets`. Jangan hanya mengunggah ZIP.
+5. Buka **Settings > Pages**, pilih **Deploy from a branch**, `main`, `/(root)` lalu Save. Buka alamat GitHub Pages setelah deploy. Dashboard akan muncul tanpa form login.
 
-## Unggah ke GitHub Pages
-
-1. Buat repository baru, misalnya `cangkang-mas`. Unggah **seluruh isi folder** `cangkang-mas` ke root repository; pastikan `index.html` ada pada root. Folder `assets` harus ikut diunggah.
-2. Repository > **Settings > Pages > Build and deployment**: pilih **Deploy from a branch**, branch `main`, folder `/(root)`, lalu Save.
-3. Tunggu hingga alamat `https://namaakun.github.io/cangkang-mas/` aktif. Buka via HP, masuk dengan akun email/password Firebase yang dibuat pada langkah 2.
-4. Konfigurasi Web Firebase boleh terlihat di source code; keamanan database bergantung pada Authentication, Rules, dan akses akun Anda. Jangan unggah file service-account/private key ke GitHub.
+**PENTING: BATASAN TANPA LOGIN**: Setiap browser/perangkat membuat identitas Firebase anonim yang berbeda dan data terpisah. Membuka di HP lain, browser lain, mode incognito, atau menghapus data browser dapat membuat akun anonim baru sehingga data lama tidak terlihat. Jangan gunakan paket ini untuk keuangan produksi bila Anda perlu satu database bersama antara HP dan laptop atau akses eksklusif hanya pemilik. Anonymous Authentication tidak membuktikan bahwa pengunjung adalah pemilik, dan orang lain yang membuka website juga dapat membuat ruang data mereka sendiri (tetapi rules ini mencegah membaca data identitas anonim Anda). Untuk satu database pribadi yang sinkron antarperangkat, diperlukan autentikasi pemilik atau layanan backend dengan pengamanan tersendiri.
 
 ## Cara menggunakan
 
