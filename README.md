@@ -40,3 +40,15 @@ Buka Lainnya > Customer > Detail / bayar > Riwayat pembelian & nota > Lihat / ce
 - Saat memilih **Cetak struk**, lebar hasil cetak dibatasi 72 mm (sesuai kertas struk 80 mm, dengan margin); tidak lagi mengikuti ukuran penuh A4/layar HP.
 - Jika menggunakan printer kertas 80 mm, pilih ukuran kertas 80 mm pada dialog cetak Android/printer apabila tersedia. Untuk kertas A4, nota tercetak kecil selebar struk pada kertas A4.
 - Tombol **Simpan PNG** dan **Kirim gambar WhatsApp** tetap menggunakan gambar asli resolusi tinggi. PNG nota tidak disimpan di Firebase.
+
+
+## Koreksi transaksi (rilis terbatas, aman untuk FIFO)
+Riwayat → Koreksi: penjualan dapat mengoreksi tanggal, harga/uang bersih Shopee, ongkir, biaya dan pembayaran awal. Tidak menggandakan omzet; log koreksi disimpan. Untuk kulak: tanggal bisa diubah; harga dan ongkir hanya bisa dikoreksi bila lot kulak versi baru masih utuh dan belum ada transaksi telur berikutnya. Berat, jenis telur, tray dan customer belum bisa dikoreksi dengan aman: aplikasi menolak perubahan tersebut. Untuk kulak versi lama tanpa identitas lot, modal tidak bisa diedit langsung. Jangan gunakan Koreksi Stok untuk memperbaiki transaksi lama. Cadangkan data sebelum memasang revisi.
+
+## Hapus transaksi (pembatalan aman)
+- Buka Riwayat → pilih transaksi kulak atau jual → Hapus. Fitur Koreksi tetap tersedia.
+- Hapus meminta alasan dan konfirmasi. Data asli tidak dihapus secara fisik dari Firestore: diberi tanda `cancelledAt`, dengan entri audit `cancellation`; laporan dan riwayat aktif tidak menghitung transaksi batal.
+- Pembalikan stok telur, tray, dan saldo bon dilakukan atomik pada transaksi Firestore. Pembatalan otomatis ditolak bila transaksi tidak terakhir untuk jenis telur, terkait pembayaran/retur/tray berikutnya, atau saldo tidak cukup.
+- Penjualan versi lama tanpa rincian lot FIFO `fifoConsumed` tidak dapat dibatalkan otomatis karena modal FIFO historis tidak dapat dibalik secara andal. Pengguna dapat memakai Koreksi yang sudah ada untuk kesalahan harga/tanggal dan perlu rekonsiliasi manual untuk kasus lain.
+- Kulak dengan pembelian tray ditolak untuk dibatalkan otomatis karena dapat mengubah biaya modal tray rata-rata. Kulak yang lot telurnya sudah terpakai juga ditolak.
+- Backup JSON sebelum melakukan koreksi/pembatalan penting. Jangan menghapus dokumen Firestore secara manual.
