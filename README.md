@@ -50,3 +50,8 @@ Invoice PNG menggunakan template krem dengan logo Cangkang Mas, alamat KEBRAON I
 - `DIBAYAR` dan `LUNAS` tidak ditampilkan; `SISA BON` hanya jika ada saldo tagihan.
 - Footer Cangkang Mas dan tulisan `THANK YOU FOR YOUR BUSINESS!` dimuat sepenuhnya dalam ukuran gambar dinamis; gambar dibuat di browser saja dan tidak diunggah ke Firebase.
 - Tidak ada perubahan pada proses login, skema Firestore, transaksi, FIFO, ataupun ikon aplikasi. Untuk menghindari cache versi lama, referensi aset HTML/JS/CSS diberi versi baru.
+
+## Revisi invoice sesuai referensi (kolom presisi)
+- Header besar, tabel lima kolom dengan nilai tepat di tengah kolom judul, kotak TOTAL merah, footer lengkap dan dekorasi lengkung krem-merah meniru referensi pengguna.
+- Tidak ada ikon/gambar produk, label DIBAYAR atau LUNAS pada nota. SISA BON hanya tampil bila ada. Gambar dihasilkan saat diminta di browser, tidak disimpan di Firebase.
+- Fitur aplikasi, sesi login, Firebase Rules, dan alur transaksi tidak diubah oleh revisi visual ini.
