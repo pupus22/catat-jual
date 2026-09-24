@@ -1,37 +1,36 @@
-# Cangkang Mas — paket perbaikan fondasi (BELUM RILIS PRODUKSI)
+# Cangkang Mas — Revisi fondasi V2 (GitHub Pages + Firebase)
 
-Paket ini merupakan **revisi parsial yang diuji dengan simulasi lokal**, bukan pernyataan bahwa semua fitur dan koreksi historis telah selesai. Jangan langsung mengganti aplikasi aktif yang sudah berisi transaksi asli dengan paket ini sebelum backup dan uji di proyek Firebase terpisah.
+## Penting sebelum memasang
+Versi ini **menggunakan struktur data baru** `users/{uid}/events` dan menghitung ulang stok, FIFO, tray, bon, dan laba dari transaksi aktif. Struktur lama `users/{uid}/entries`, `products`, `contacts`, dan `meta/tray` **tidak dibaca/dimigrasikan otomatis**. Gunakan pada database usaha yang benar-benar kosong seperti yang disampaikan pemilik. Jika ternyata masih ada data versi lama, JANGAN ganti aplikasi aktif sebelum backup dan migrasi; tidak cukup hanya mengganti ZIP.
 
-## Perbaikan yang DIIMPLEMENTASIKAN
+Akun Email/Password Firebase tetap digunakan dan sesi login disimpan di browser. ZIP mencakup konfigurasi Web Firebase untuk proyek `cangkang-mas` dan `firestore.rules` terbatas pada UID pemilik yang sebelumnya Anda berikan. API key Firebase Web bukan password; **jangan menaruh password Firebase di GitHub**.
 
-- Sesi login Email/Password tetap dipertahankan; akun anonim tidak dibuat.
-- Simpan ganda akibat dua kali menekan Simpan dicegah di antarmuka; kulak dan penjualan memakai ID operasi stabil selama form yang sama masih terbuka, sehingga pengulangan setelah respons jaringan tidak pasti tidak membuat transaksi baru. Pembayaran bon juga memakai ID operasi stabil.
-- Pembayaran bon memilih **nota tertentu**, mengurangi sisa bon nota dan saldo customer dalam satu transaksi Firestore. Nota cetak ulang menampilkan nilai pembayaran terbaru. Bon lama yang pernah dicicil tanpa alokasi per nota harus direkonsiliasi terlebih dahulu; aplikasi menolak pembayaran baru jika saldo total tidak cocok dengan jumlah saldo nota.
-- Ringkasan Shopee memperhitungkan tray dibeli sekali; nota Shopee tidak mengulang baris penerimaan bersih dua kali.
-- Form penjualan tidak dihapus oleh update data real-time saat sedang diisi.
-- Kesalahan stok tray saat tukar menampilkan saldo dan cara mencatat stok awal/opname.
-- Format angka tetap titik sebagai pemisah ribuan; gram dan rupiah ditampilkan bulat. Logo serta desain nota tetap.
-- Firestore Rules pada paket hanya mengizinkan UID akun Email/Password pemilik yang sebelumnya diberikan, pada ruang data UID sendiri. Jangan menimpa Rules yang telah dipersonalisasi tanpa memeriksa UID-nya.
+## Cara memasang
+1. Ekstrak ZIP. Upload **semua isi folder `cangkang-mas-v2`** (bukan folder luarnya) ke root repository GitHub Pages yang saat ini digunakan. File `index.html`, `app.js`, `engine.mjs`, `receipt.js`, `style.css`, `firebase-config.js`, `assets/logo.png`, `firestore.rules` harus tersedia sesuai struktur di ZIP.
+2. Di Firebase Console pastikan Authentication → Sign-in method → Email/Password aktif dan akun pemilik masih ada. Firestore Rules gunakan isi file `firestore.rules` jika belum terpasang; tidak perlu mengganti UID jika akun belum berubah. Jangan buka database untuk semua akun Anonymous.
+3. Setelah GitHub Pages selesai deploy, tutup tab aplikasi lama di HP dan laptop. Buka URL baru, refresh, login dengan akun yang sama. Pastikan **tidak ada transaksi baru yang diinput pada tab aplikasi versi lama**.
+4. Sebelum transaksi asli, uji dengan data contoh: tambah jenis telur, supplier, customer, stok awal tray kosong 8 pcs, kulak telur 10 kg (tray terima 8, tukar 8), penjualan sebagian, bon, cicilan, edit dan pembatalan salah input, nota, laporan. Cocokkan hasil dengan kondisi fisik.
 
-## MASIH BELUM SELESAI — jangan gunakan fitur ini pada data penting
+## Alur utama
+- Beranda: tombol kulak, jual, tray, retur; ringkasan stok dan laba.
+- Jual: satu jenis telur per transaksi, gram bulat; harga per kg bebas diubah. Shopee cukup input uang bersih yang diterima; potongan Shopee tidak dihitung ulang.
+- Stok: jenis telur boleh ditambah tanpa harga wajib; stok awal telur/tray dan stok opname.
+- Lainnya: supplier/customer, transaksi tray tukar/pinjam/beli/kembali/rusak, retur customer/supplier, bon per nota, penggantian, biaya, backup JSON.
+- **Kelola Data** satu-satunya tempat tombol Edit dan Hapus input salah, untuk semua jenis data. Hapus = batalkan pengaruhnya, dokumen tetap untuk audit. Koreksi otomatis menghitung ulang seluruh catatan; jika stok/saldo di salah satu tanggal menjadi negatif atau nota yang terkait menjadi tidak valid, koreksi diblokir dengan notifikasi dan data awal tidak diubah. Jika membatalkan penjualan yang sudah ada cicilan, batalkan/koreksi cicilan terkait terlebih dahulu.
+- Tray fisik layak menghitung total tray yang berada di usaha, baik kosong maupun berisi telur. Jumlah tray kosong yang diserahkan ke kandang harus sesuai fisik dan dicatat. Karena jumlah tray per ikat tidak tetap, aplikasi tidak menghitung tray otomatis dari berat.
+- Riwayat/Customer → nota: buat PNG lokal memakai logo dan desain nota yang disepakati; gambar tidak diunggah ke Firebase. Cetak struk lebar 72 mm atau bagikan lewat menu Share ke WhatsApp jika browser mendukung.
 
-1. Edit/Hapus **seluruh kategori** belum diimplementasikan: menu Kelola Data masih memiliki batasan lama.
-2. Rekalkulasi FIFO historis setelah mengedit berat/harga/tanggal kulak lama atau menghapus transaksi yang sudah memiliki transaksi lanjutan **belum selesai**.
-3. Pencatatan tray kosong vs tray yang sedang berisi telur belum dipisahkan sepenuhnya. Stok awal fisik harus dicatat sesuai kenyataan.
-4. Retur customer ↔ supplier, penggantian, dan pembalikan kas ketika membatalkan penjualan lunas belum direkonsiliasi penuh.
-5. Laporan laba lintas bulan dan alokasi biaya bersama belum diaudit tuntas.
-6. Belum diuji pada Firebase produksi/HP Anda; simulasi lokal tidak membuktikan kondisi jaringan, Rules, atau kompatibilitas data lama.
+## Cadangan dan pemulihan
+- Lainnya → Ekspor backup JSON: mencakup event/transaksi dan riwayat edit/hapus (`audits`). Simpan file di tempat aman.
+- Lainnya → Pulihkan backup: **hanya jika database events benar-benar kosong**, file V2 valid, dan maksimum 400 dokumen event+audit; dilakukan satu transaksi Firestore atomik. Backup lebih besar memerlukan prosedur migrasi terpisah; aplikasi menolak impor sebagian. Jangan mengunggah ulang backup ke database yang sudah berisi transaksi.
 
-## Menguji tanpa mengubah transaksi asli
+## Validasi dan batasan pengujian
+`node tests.mjs` menjalankan pengujian logika lokal, termasuk FIFO, tukar tray, bon per nota, retur, biaya, perubahan tanggal, koreksi/hapus dan pembulatan. UI login dan rangkaian transaksi juga diuji di Chromium lokal **menggunakan Firebase tiruan**, bukan menggunakan akses akun atau Firestore pengguna secara langsung. Anda tetap harus melakukan uji singkat login, simpan dan sinkronisasi langsung pada HP/laptop di Firebase Anda sebelum digunakan untuk pembukuan usaha. Tidak ada pengujian cetak fisik pada printer Anda atau berbagi berkas langsung dari browser HP Anda.
 
-1. Ekspor cadangan JSON dari aplikasi aktif. Simpan juga cadangan Firestore yang dapat dipulihkan; JSON browser hanya ekspor isi tampilan saat itu, bukan backup database terverifikasi.
-2. Buat **proyek Firebase terpisah untuk pengujian**; ganti hanya `firebase-config.js` dan sesuaikan `firestore.rules` dengan UID akun pengujian.
-3. Unggah isi folder `cangkang-mas` ke GitHub Pages repo uji. Jangan campur file lama dan baru.
-4. Uji kulak → jual → tukar tray → cicil bon → cetak ulang nota, lalu bandingkan stok, bon, dan laba dengan perhitungan manual.
-5. Jangan memindahkan aplikasi aktif sebelum semua skenario pada bagian 'MASIH BELUM SELESAI' diperbaiki dan diverifikasi dengan salinan data sesungguhnya.
-
-## Pengujian otomatis lokal
-
-Skrip `tests/smoke.cjs` menguji simulasi perhitungan dan penyimpanan atomik tiruan. Jalankan `node tests/smoke.cjs`. Simulasi ini **bukan** pengujian Firestore sebenarnya.
-
-Gambar nota PNG dihasilkan di browser dan **tidak disimpan ke Firebase**.
+## Struktur data
+```
+users/{ownerUid}/events/{eventId}   # kejadian/input aktif atau dibatalkan
+users/{ownerUid}/audit/{auditId}    # riwayat before/after dan alasan koreksi
+users/{ownerUid}/meta/revision     # pengaman urutan penyimpanan antarperangkat
+```
+Ringkasan stok, saldo dan laporan **diturunkan dari events**, bukan disimpan sebagai angka salinan yang rawan tidak sinkron. Browser membaca seluruh histori untuk perhitungan; untuk volume data sangat besar atau multiuser perlu arsitektur backend khusus. Konfigurasi ini ditujukan untuk satu pemilik usaha sebagaimana diminta.

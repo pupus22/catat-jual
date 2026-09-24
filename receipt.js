@@ -38,11 +38,11 @@ export async function makeReceiptPNG(entry){
   const rows=[];
   const weight=Number(entry.weight)||0,price=Number(entry.price)||0,delivery=Number(entry.delivery)||0;
   const trayBought=Number(entry.trayBought)||0,trayOut=Number(entry.trayOut)||0,trayIn=Number(entry.trayIn)||0;
-  const trayCost=trayBought*(Number(entry.trayPrice)||0);
   const isShopee=entry.channel==='shopee';
+  const trayCost=isShopee?0:trayBought*(Number(entry.trayPrice)||0);
   const eggTotal=isShopee?Math.max(0,Number(entry.eggRevenue)||0):Math.max(0,(Number(entry.eggRevenue)||0)-delivery);
   rows.push({name:`Telur ${clean(entry.productName||'')}`,qty:`${idFmt(weight)} gram`,price:isShopee?'—':idRupiah(price),subtotal:idRupiah(eggTotal)});
-  if(trayOut>0)rows.push({name:trayBought===trayOut?'Tray (beli)':trayBought>0?'Tray (tukar + beli)':entry.trayMode==='loan'?'Tray (pinjam)':'Tray (tukar)',qty:`${idFmt(trayOut)} pcs`,price:trayBought?idRupiah(entry.trayPrice):'—',subtotal:idRupiah(trayCost)});
+  if(trayOut>0)rows.push({name:trayBought===trayOut?'Tray (beli)':trayBought>0?'Tray (tukar + beli)':entry.trayMode==='loan'?'Tray (pinjam)':'Tray (tukar)',qty:`${idFmt(trayOut)} pcs`,price:trayBought&&!isShopee?idRupiah(entry.trayPrice):'—',subtotal:idRupiah(trayCost)});
   if(delivery>0) rows.push({name:'Ongkir',qty:'—',price:'—',subtotal:idRupiah(delivery)});
   // Penerimaan bersih Shopee sudah menjadi total baris telur; jangan tampilkan lagi sebagai baris kedua.
   let y=680;
